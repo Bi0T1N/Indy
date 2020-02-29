@@ -22561,18 +22561,18 @@ pass a constant anyway.
 }
 function LoadFunction(const FceName: {$IFDEF WINCE}TIdUnicodeString{$ELSE}string{$ENDIF}; const ACritical : Boolean = True): Pointer;
 begin
-  Result := {$IFDEF WINDOWS}Windows.{$ENDIF}GetProcAddress(hIdSSL, {$IFDEF WINCE}PWideChar{$ELSE}PChar{$ENDIF}(FceName));
-  if (Result = nil) and ACritical then begin
-    FFailedLoadList.Add(FceName); {do not localize}
-  end;
+  if ACritical then
+    Result := LoadLibFunction(hIdSSL, FceName, FFailedLoadList)
+  else
+    Result := LoadLibFunction(hIdSSL, FceName, nil);
 end;
 
 function LoadFunctionCLib(const FceName: {$IFDEF WINCE}TIdUnicodeString{$ELSE}string{$ENDIF}; const ACritical : Boolean = True): Pointer;
 begin
-  Result := {$IFDEF WINDOWS}Windows.{$ENDIF}GetProcAddress(hIdCrypto, {$IFDEF WINCE}PWideChar{$ELSE}PChar{$ENDIF}(FceName));
-  if (Result = nil) and ACritical then begin
-    FFailedLoadList.Add(FceName); {do not localize}
-  end;
+  if ACritical then
+    Result := LoadLibFunction(hIdCrypto, FceName, FFailedLoadList)
+  else
+    Result := LoadLibFunction(hIdCrypto, FceName, nil);
 end;
 
 // Id_ossl_old_des_set_odd_parity

@@ -1817,6 +1817,7 @@ function IPv4MakeLongWordInRange(const AInt: Int64; const A256Power: Integer): U
 function IndyRegisterExpectedMemoryLeak(AAddress: Pointer): Boolean;
   {$ENDIF}
 {$ENDIF}
+function LoadLibFunction(const ALibHandle: TIdLibHandle; const AProcName: {$IFDEF WINCE}TIdUnicodeString{$ELSE}String{$ENDIF}; const AFailedLoadList: TStrings = nil): Pointer;
 {$IFDEF UNIX}
 function HackLoad(const ALibName : String; const ALibVersions : array of String) : TIdLibHandle;
 {$ENDIF}
@@ -4447,6 +4448,21 @@ begin
   end;
 end;
 {$ENDIF}
+
+{ IMPORTANT!!!
+
+WindowsCE only has a Unicode (WideChar) version of GetProcAddress.  We could use
+a version of GetProcAddress in the FreePascal dynlibs unit but that does a
+conversion from ASCII to Unicode which might not be necessary since most calls
+pass a constant anyway.
+}
+function LoadLibFunction(const ALibHandle: TIdLibHandle; const AProcName: {$IFDEF WINCE}TIdUnicodeString{$ELSE}String{$ENDIF}; const AFailedLoadList: TStrings = nil): Pointer;
+begin
+  Result := {$IFDEF WINDOWS}Windows.{$ENDIF}GetProcAddress(ALibHandle, {$IFDEF WINCE}PWideChar{$ELSE}PChar{$ENDIF}(AProcName));
+  if (Result = nil) and (AFailedLoadList <> nil) then begin
+    AFailedLoadList.Add(AProcName); {do not localize}
+  end;
+end;
 
 {$IFDEF UNIX}
 function HackLoadFileName(const ALibName, ALibVer : String) : string;
